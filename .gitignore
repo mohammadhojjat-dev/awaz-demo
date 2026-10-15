@@ -1,0 +1,12 @@
+.env
+node_modules/
+dist/
+coverage/
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+agent/data/
+*.log
+.DS_Store
+*.tsbuildinfo
