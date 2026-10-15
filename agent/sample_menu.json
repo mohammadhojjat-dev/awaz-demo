@@ -1,0 +1,208 @@
+[
+  {
+    "id": 1,
+    "slug": "qabuli-palaw",
+    "nameFa": "قابلی پلو",
+    "nameEn": "Qabuli palaw",
+    "category": "main",
+    "priceAfn": 250,
+    "aliases": [
+      "کابلی پلو",
+      "قابلی",
+      "کابلی",
+      "پلو",
+      "qabuli",
+      "kabuli pulao"
+    ],
+    "available": true,
+    "sortOrder": 0
+  },
+  {
+    "id": 2,
+    "slug": "mantu",
+    "nameFa": "منتو",
+    "nameEn": "Mantu",
+    "category": "main",
+    "priceAfn": 200,
+    "aliases": [
+      "مانتو",
+      "منتوی",
+      "mantu",
+      "manti"
+    ],
+    "available": true,
+    "sortOrder": 1
+  },
+  {
+    "id": 3,
+    "slug": "ashak",
+    "nameFa": "آشک",
+    "nameEn": "Ashak",
+    "category": "main",
+    "priceAfn": 200,
+    "aliases": [
+      "آشک",
+      "اشک",
+      "ashak"
+    ],
+    "available": true,
+    "sortOrder": 2
+  },
+  {
+    "id": 4,
+    "slug": "kabab-tikka",
+    "nameFa": "کباب تکه",
+    "nameEn": "Tikka kebab",
+    "category": "main",
+    "priceAfn": 300,
+    "aliases": [
+      "کباب تکه",
+      "تکه",
+      "tikka kebab",
+      "tikka"
+    ],
+    "available": true,
+    "sortOrder": 3
+  },
+  {
+    "id": 5,
+    "slug": "kabab-kobide",
+    "nameFa": "کباب کوبیده",
+    "nameEn": "Kobide kebab",
+    "category": "main",
+    "priceAfn": 250,
+    "aliases": [
+      "کوبیده",
+      "کباب کوبیده",
+      "kobide"
+    ],
+    "available": true,
+    "sortOrder": 4
+  },
+  {
+    "id": 6,
+    "slug": "chalaw-qorma",
+    "nameFa": "چلو قورمه",
+    "nameEn": "Chalaw with qorma",
+    "category": "main",
+    "priceAfn": 220,
+    "aliases": [
+      "چلو",
+      "قورمه",
+      "چلو قورمه",
+      "chalaw",
+      "qorma"
+    ],
+    "available": true,
+    "sortOrder": 5
+  },
+  {
+    "id": 7,
+    "slug": "shorwa",
+    "nameFa": "شوربا",
+    "nameEn": "Shorwa (soup)",
+    "category": "main",
+    "priceAfn": 150,
+    "aliases": [
+      "شوربه",
+      "شوربا",
+      "shorwa",
+      "soup"
+    ],
+    "available": true,
+    "sortOrder": 6
+  },
+  {
+    "id": 8,
+    "slug": "bolani",
+    "nameFa": "بولانی",
+    "nameEn": "Bolani",
+    "category": "side",
+    "priceAfn": 80,
+    "aliases": [
+      "بولانی",
+      "بولانی کچالو",
+      "bolani"
+    ],
+    "available": true,
+    "sortOrder": 7
+  },
+  {
+    "id": 9,
+    "slug": "naan",
+    "nameFa": "نان",
+    "nameEn": "Naan bread",
+    "category": "side",
+    "priceAfn": 20,
+    "aliases": [
+      "نان",
+      "نون",
+      "naan",
+      "bread"
+    ],
+    "available": true,
+    "sortOrder": 8
+  },
+  {
+    "id": 10,
+    "slug": "doogh",
+    "nameFa": "دوغ",
+    "nameEn": "Doogh",
+    "category": "drink",
+    "priceAfn": 50,
+    "aliases": [
+      "دوغ",
+      "doogh"
+    ],
+    "available": true,
+    "sortOrder": 9
+  },
+  {
+    "id": 11,
+    "slug": "cola",
+    "nameFa": "کوکاکولا",
+    "nameEn": "Coca-Cola",
+    "category": "drink",
+    "priceAfn": 40,
+    "aliases": [
+      "کوکا",
+      "کولا",
+      "نوشابه",
+      "cola",
+      "coke",
+      "coca cola"
+    ],
+    "available": true,
+    "sortOrder": 10
+  },
+  {
+    "id": 12,
+    "slug": "green-tea",
+    "nameFa": "چای سبز",
+    "nameEn": "Green tea",
+    "category": "drink",
+    "priceAfn": 30,
+    "aliases": [
+      "چای",
+      "چای سبز",
+      "green tea",
+      "tea"
+    ],
+    "available": true,
+    "sortOrder": 11
+  },
+  {
+    "id": 13,
+    "slug": "firni",
+    "nameFa": "فرنی",
+    "nameEn": "Firni",
+    "category": "dessert",
+    "priceAfn": 80,
+    "aliases": [
+      "فرنی",
+      "firni"
+    ],
+    "available": true,
+    "sortOrder": 12
+  }
+]

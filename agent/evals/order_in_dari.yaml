@@ -1,0 +1,71 @@
+# Scripted text tests: the harness types the caller's lines (no microphone)
+# and checks which tools the agent calls, with which arguments.
+#
+# These run against the real Gemini model, so they need GOOGLE_API_KEY.
+# Start the agent with the eval transport, then run the scenarios:
+#
+#   uv run bot.py -t eval
+#   uv run --with "pipecat-ai[cli]==1.12.0" pipecat eval run evals/order_in_dari.yaml -v
+#
+# Only exact checks are used (which function, which arguments), so no judge
+# model is needed.
+
+name: order_in_dari
+
+scenarios:
+  - name: simple_order
+    turns:
+      - expect:
+          - event: response
+
+      - user: "سلام، دو قابلی پلو و یک دوغ می‌خواهم."
+        expect:
+          - event: function_call
+            calls:
+              - name: add_item
+                args: { item: qabuli-palaw, quantity: 2 }
+              - name: add_item
+                args: { item: doogh, quantity: 1 }
+
+      - user: "بس است، همین."
+        expect:
+          - event: function_call
+            calls:
+              - name: finish_items
+
+      - user: "نامم احمد است، جاده محبس کوچه دوم، نزدیک مسجد جامع. شماره‌ام صفر هفت نه نه، یک دو سه، چهار پنج شش."
+        expect:
+          - event: function_call
+            calls:
+              - name: set_customer_details
+
+      - user: "بلی، درست است."
+        expect:
+          - event: function_call
+            calls:
+              - name: confirm_order
+
+  - name: mixed_dari_english
+    turns:
+      - expect:
+          - event: response
+
+      - user: "Hi، یک mantu و two coke لطفاً."
+        expect:
+          - event: function_call
+            calls:
+              - name: add_item
+                args: { item: mantu, quantity: 1 }
+              - name: add_item
+                args: { item: cola, quantity: 2 }
+
+  - name: asks_for_a_person
+    turns:
+      - expect:
+          - event: response
+
+      - user: "می‌خواهم با یک آدم گپ بزنم، شماره‌ام ۰۷۰۰۱۱۱۲۲۲ است."
+        expect:
+          - event: function_call
+            calls:
+              - name: request_callback
