@@ -1,0 +1,19 @@
+# HTTPS for the demo. Caddy gets a free certificate for DOMAIN automatically;
+# the domain's A record must point at this server and ports 80/443 be open.
+# Browsers only allow the microphone on HTTPS pages, so this is required.
+
+{$DOMAIN} {
+	encode gzip
+
+	# Backend: staff dashboard and its API (all protected by ADMIN_TOKEN).
+	@backend path /dashboard /orders /orders/* /calls /calls/* /stats /menu /menu/* /health
+	handle @backend {
+		reverse_proxy 127.0.0.1:3000
+	}
+
+	# Everything else is the voice agent: the call page (/order), WebRTC
+	# signalling (/api/offer), the WhatsApp webhook (/whatsapp) and /menu.json.
+	handle {
+		reverse_proxy 127.0.0.1:7860
+	}
+}
