@@ -274,6 +274,21 @@ async def test_callback_hands_the_caller_to_staff(fake_backend):
     assert call.fm.state["outcome"] == "callback"
 
 
+async def test_callback_with_a_garbled_number_asks_again(fake_backend):
+    call = await Call(fake_backend).start()
+    await call.say("add_item", item="shorwa")
+    await call.say("finish_items")
+    await call.say("set_customer_details", name="علی", address="کارته", phone="0799123456")
+    # A number the caller just gave must not be swapped for the one heard earlier.
+    result = await call.say("request_callback", reason="caller asked for a person", phone="07")
+    assert result["status"] == "bad_phone"
+    assert call.node == "confirm"
+    assert fake_backend.orders == []
+    # A blank number still falls back to the one already known.
+    assert (await call.say("request_callback", reason="caller asked for a person"))["status"] == "ok"
+    assert fake_backend.orders[0]["customerPhone"] == "0799123456"
+
+
 async def test_a_failed_save_does_not_claim_success(fake_backend):
     call = await Call(fake_backend).start()
     await call.say("add_item", item="shorwa")

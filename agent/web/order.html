@@ -123,7 +123,8 @@ const controls = document.getElementById('controls');
 const muteBtn = document.getElementById('mute-btn');
 const botAudio = document.getElementById('bot-audio');
 
-let pc = null, stream = null, tick = null, startedAt = 0;
+let pc = null, stream = null, tick = null, startedAt = 0, dropTimer = null;
+const DROP_GRACE_MS = 8000;
 const faNum = (n) => Number(n).toLocaleString('fa-AF');
 
 function setState(state, message) {
@@ -178,16 +179,31 @@ async function startCall() {
     } catch {}
   };
   pc.ontrack = (event) => { botAudio.srcObject = event.streams[0]; };
-  pc.onconnectionstatechange = () => {
-    if (pc && pc.connectionState === 'connected') {
+  const conn = pc;
+  conn.onconnectionstatechange = () => {
+    if (pc !== conn) return;  // a call that already ended
+    clearTimeout(dropTimer);
+    dropTimer = null;
+    const state = conn.connectionState;
+    if (state === 'connected') {
       setState('live', 'وصل شد. گپ بزنید، دستیار گوش می‌دهد.');
-      startedAt = Date.now();
-      tick = setInterval(() => {
-        const s = Math.floor((Date.now() - startedAt) / 1000);
-        timer.textContent = `${faNum(Math.floor(s / 60))}:${String(s % 60).padStart(2, '0').replace(/\d/g, (d) => faNum(d))}`;
-      }, 500);
-    } else if (pc && ['failed', 'disconnected', 'closed'].includes(pc.connectionState)) {
-      endCall(pc.connectionState === 'failed' ? 'وصل نشد. اینترنت را بررسی کنید و دوباره زنگ بزنید.' : 'تماس تمام شد. تشکر از سفارش‌تان.');
+      if (!tick) {  // not again after recovering from a short drop
+        startedAt = Date.now();
+        tick = setInterval(() => {
+          const s = Math.floor((Date.now() - startedAt) / 1000);
+          timer.textContent = `${faNum(Math.floor(s / 60))}:${String(s % 60).padStart(2, '0').replace(/\d/g, (d) => faNum(d))}`;
+        }, 500);
+      }
+    } else if (state === 'disconnected') {
+      // Mobile networks drop for a moment; give the connection a chance to come back.
+      setState('live', 'اینترنت ضعیف شد، صبر کنید…');
+      dropTimer = setTimeout(() => {
+        if (pc === conn && conn.connectionState === 'disconnected') {
+          endCall('تماس قطع شد. اینترنت را بررسی کنید و دوباره زنگ بزنید.');
+        }
+      }, DROP_GRACE_MS);
+    } else if (state === 'failed' || state === 'closed') {
+      endCall(state === 'failed' ? 'وصل نشد. اینترنت را بررسی کنید و دوباره زنگ بزنید.' : 'تماس تمام شد. تشکر از سفارش‌تان.');
     }
   };
   try {
@@ -208,6 +224,8 @@ async function startCall() {
 }
 
 function endCall(message) {
+  clearTimeout(dropTimer);
+  dropTimer = null;
   clearInterval(tick);
   tick = null;
   timer.textContent = '';

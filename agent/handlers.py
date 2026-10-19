@@ -265,6 +265,12 @@ async def request_callback(flow_manager: FlowManager, reason: str, phone: str = 
     """
     state = flow_manager.state
     given = normalize_phone(phone) if phone.strip() else None
+    if phone.strip() and given is None:
+        # Don't silently call back a different number than the one the caller just gave.
+        return {
+            "status": "bad_phone",
+            "say": "The phone number seems incomplete; ask the caller to say it again slowly.",
+        }, TRANSITION_IN_YAML
     callback_phone = given or state.get("customer_phone") or state.get("caller_phone")
     if not callback_phone:
         return {

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -39,6 +40,10 @@ export class MenuService {
   }
 
   async update(id: number, changes: UpdateMenuItemDto): Promise<MenuItem> {
+    // Drizzle throws "No values to set" on an empty update, which would surface as a 500.
+    if (changes.available === undefined && changes.priceAfn === undefined) {
+      throw new BadRequestException('Send at least one of: available, priceAfn');
+    }
     const [row] = await this.db.update(menuItems).set(changes).where(eq(menuItems.id, id)).returning();
     if (!row) throw new NotFoundException(`Menu item ${id} not found`);
     return row;

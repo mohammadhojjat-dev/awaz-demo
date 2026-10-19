@@ -31,8 +31,9 @@ flowchart LR
    Every item is checked against the menu; nothing off the menu can be added.
 3. The agent asks for name, address and a nearby landmark (and a phone number
    for web callers; WhatsApp callers' numbers are already known).
-4. It reads back the items and the total. **All prices come from the
-   backend**, never from the AI.
+4. It reads back the items and the total. **Prices are never set by the AI**:
+   they come from the backend's menu, or, in standalone mode (no
+   `BACKEND_URL`), from the sample menu in `agent/sample_menu.json`.
 5. The caller confirms; the restaurant gets the order on Telegram, and the
    caller hears the order number and delivery time.
 6. If the agent misunderstands twice, the caller asks for a person, or saving
@@ -74,9 +75,10 @@ setup includes Caddy, which gets a free certificate automatically.
 ## Tests
 
 ```bash
-cd agent && uv run pytest                      # 37 tests: menu, cart, tools, whole calls
-cd backend && npm test                         # unit tests
-TEST_DATABASE_URL=postgres://... npm run test:e2e   # API tests against PostgreSQL
+# From the repository root; each line runs in a subshell, so the folder doesn't change.
+(cd agent && uv run pytest)                    # menu, cart, tools, whole calls
+(cd backend && npm test)                       # unit tests
+(cd backend && TEST_DATABASE_URL=postgres://... npm run test:e2e)   # API tests against PostgreSQL
 ```
 
 The agent tests drive complete calls through the real flow and tools with a

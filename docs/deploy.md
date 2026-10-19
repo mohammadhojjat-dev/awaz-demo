@@ -70,6 +70,8 @@ The sample Herat menu is inserted on first start. To use the real menu, edit
 start, or change prices and mark items sold out from the API:
 
 ```bash
+# Run in the project folder; reads ADMIN_TOKEN from .env into this shell.
+export ADMIN_TOKEN="$(grep '^ADMIN_TOKEN=' .env | cut -d= -f2-)"
 curl -X PATCH https://YOUR_DOMAIN/menu/1 \
   -H "Authorization: Bearer $ADMIN_TOKEN" -H "content-type: application/json" \
   -d '{"priceAfn": 280, "available": true}'

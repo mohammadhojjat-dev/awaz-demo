@@ -5,9 +5,10 @@ There are three kinds of test, from cheapest to most realistic.
 ## 1. Automated tests (no key, no network)
 
 ```bash
-cd agent && uv run pytest
-cd backend && npm test
-TEST_DATABASE_URL=postgres://awaz:awaz@localhost:5432/awaz_test npm run test:e2e
+# From the repository root; each line runs in a subshell, so the folder doesn't change.
+(cd agent && uv run pytest)
+(cd backend && npm test)
+(cd backend && TEST_DATABASE_URL=postgres://awaz:awaz@localhost:5432/awaz_test npm run test:e2e)
 ```
 
 `agent/tests/test_conversation.py` drives whole calls through the real

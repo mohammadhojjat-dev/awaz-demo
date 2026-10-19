@@ -57,6 +57,10 @@ describe.skipIf(!databaseUrl)('Awaz backend (e2e)', () => {
     expect(res.body[0]).toMatchObject({ slug: 'qabuli-palaw', nameFa: 'قابلی پلو', priceAfn: 250 });
   });
 
+  it('rejects an empty menu update', async () => {
+    await request(app.getHttpServer()).patch('/menu/1').set(admin()).send({}).expect(400);
+  });
+
   it('quotes a cart with server-side prices', async () => {
     const res = await request(app.getHttpServer())
       .post('/orders/quote')
