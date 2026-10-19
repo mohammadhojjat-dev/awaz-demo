@@ -1,0 +1,65 @@
+# Production-style setup for one VPS: database, backend, voice agent and
+# Caddy for HTTPS. Start with:  docker compose up -d --build
+#
+# The agent and Caddy use the host network: WebRTC audio travels over UDP
+# ports chosen per call, which Docker's port mapping cannot forward.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: awaz
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: awaz
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U awaz -d awaz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://awaz:${POSTGRES_PASSWORD}@postgres:5432/awaz
+      PORT: "3000"
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  agent:
+    build: ./agent
+    restart: unless-stopped
+    network_mode: host
+    env_file: .env
+    environment:
+      BACKEND_URL: http://127.0.0.1:3000
+      AGENT_HOST: 127.0.0.1
+      AGENT_PORT: "7860"
+    depends_on:
+      - backend
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - agent
+      - backend
+
+volumes:
+  postgres-data:
+  caddy-data:
+  caddy-config:

@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>آواز — داشبورد سفارش‌ها</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --lapis: #1B3A8F; --gold: #E3A92C; --bg: #f5f6fa; --card: #fff; --ink: #172036;
+    --muted: #5d6680; --line: #e3e6ef; --good: #1f8a4c; --warn: #b7791f; --bad: #c0392b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1424; --card: #172036; --ink: #eef1f8; --muted: #9aa4bf; --line: #27314d; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: Vazirmatn, Tahoma, system-ui, sans-serif; font-size: 15px; }
+  header { background: var(--lapis); color: #fff; padding: 14px 20px; display: flex;
+           align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { margin: 0; font-size: 19px; }
+  header h1 span { color: var(--gold); }
+  main { max-width: 1200px; margin: 0 auto; padding: 16px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .stat .label { color: var(--muted); font-size: 13px; }
+  .stat .value { font-size: 26px; font-weight: 700; margin-top: 4px; }
+  h2 { font-size: 17px; margin: 24px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; }
+  tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 600; }
+  .s-new { background: #e7edfb; color: var(--lapis); } .s-callback { background: #fdf1dc; color: var(--warn); }
+  .s-accepted { background: #e6f4ec; color: var(--good); } .s-delivered { background: #ececec; color: #444; }
+  .s-cancelled { background: #f8e3e1; color: var(--bad); }
+  button { font: inherit; border: 1px solid var(--line); background: var(--card); color: var(--ink);
+           border-radius: 8px; padding: 4px 10px; cursor: pointer; margin: 2px; }
+  button.primary { background: var(--lapis); color: #fff; border-color: var(--lapis); }
+  .items { margin: 0; padding-inline-start: 18px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  details summary { cursor: pointer; color: var(--lapis); }
+  .line-user { color: var(--ink); } .line-assistant { color: var(--muted); }
+  #login { max-width: 420px; margin: 60px auto; background: var(--card); border: 1px solid var(--line);
+           border-radius: 12px; padding: 20px; }
+  #login input { width: 100%; padding: 10px; font: inherit; border-radius: 8px; border: 1px solid var(--line);
+                 margin: 10px 0; direction: ltr; }
+  .error { color: var(--bad); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>آواز <span>●</span> داشبورد سفارش‌های تلفنی</h1>
+  <div><span id="updated" class="muted" style="color:#dfe5f7"></span>
+    <button id="logout" hidden>خروج</button></div>
+</header>
+
+<section id="login" hidden>
+  <h2 style="margin-top:0">ورود کارمندان</h2>
+  <p class="muted">رمز داشبورد (ADMIN_TOKEN) را وارد کنید. این رمز فقط در همین مرورگر نگه‌داری می‌شود.</p>
+  <input id="token" type="password" autocomplete="current-password" placeholder="ADMIN_TOKEN">
+  <button class="primary" id="login-btn">ورود</button>
+  <p class="error" id="login-error"></p>
+</section>
+
+<main id="app" hidden>
+  <div class="stats">
+    <div class="stat"><div class="label">تماس‌ها</div><div class="value" id="st-calls">–</div></div>
+    <div class="stat"><div class="label">تکمیل بدون کارمند</div><div class="value" id="st-rate">–</div></div>
+    <div class="stat"><div class="label">نیاز به تماس دوباره</div><div class="value" id="st-callbacks">–</div></div>
+    <div class="stat"><div class="label">میانگین مدت تماس</div><div class="value" id="st-duration">–</div></div>
+    <div class="stat"><div class="label">هزینه تخمینی هر تماس</div><div class="value" id="st-cost">–</div></div>
+  </div>
+
+  <h2>سفارش‌ها</h2>
+  <div class="card"><table>
+    <thead><tr><th>#</th><th>وضعیت</th><th>مشتری</th><th>اقلام</th><th>مجموع</th><th>زمان</th><th></th></tr></thead>
+    <tbody id="orders"></tbody>
+  </table></div>
+
+  <h2>تماس‌ها</h2>
+  <div class="card"><table>
+    <thead><tr><th>زمان</th><th>کانال</th><th>نتیجه</th><th>مدت</th><th>هزینه</th><th>متن گفتگو</th></tr></thead>
+    <tbody id="calls"></tbody>
+  </table></div>
+</main>
+
+<script>
+// All untrusted text (names, addresses, transcripts) is inserted with
+// textContent, never innerHTML, so a caller cannot inject markup.
+const STATUS = { new: 'جدید', callback: 'تماس دوباره', accepted: 'پذیرفته', delivered: 'تحویل شد', cancelled: 'لغو' };
+const OUTCOME = { ordered: 'سفارش ثبت شد', callback: 'تماس دوباره', abandoned: 'نیمه‌کاره' };
+const CHANNEL = { web: 'وب', whatsapp: 'واتس‌اپ', phone: 'تلفن', eval: 'آزمایش' };
+const fa = (n) => Number(n).toLocaleString('fa-AF');
+const el = (tag, props = {}, ...children) => {
+  const node = document.createElement(tag);
+  Object.assign(node, props);
+  for (const child of children) node.append(child);
+  return node;
+};
+const when = (iso) => new Date(iso).toLocaleString('fa-AF', { dateStyle: 'short', timeStyle: 'short' });
+
+let token = null;
+try { token = localStorage.getItem('awazAdminToken'); } catch {}
+
+async function api(path, options = {}) {
+  const res = await fetch(path, {
+    ...options,
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${token}`, ...(options.headers || {}) },
+  });
+  if (res.status === 401) { logout(); throw new Error('unauthorized'); }
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+function logout() {
+  token = null;
+  try { localStorage.removeItem('awazAdminToken'); } catch {}
+  document.getElementById('app').hidden = true;
+  document.getElementById('logout').hidden = true;
+  document.getElementById('login').hidden = false;
+}
+
+async function setStatus(id, status) {
+  await api(`/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
+  refresh();
+}
+
+function renderOrders(orders) {
+  const body = document.getElementById('orders');
+  body.replaceChildren();
+  if (orders.length === 0) {
+    body.append(el('tr', {}, el('td', { colSpan: 7, className: 'muted', textContent: 'هنوز سفارشی نیست.' })));
+  }
+  for (const o of orders) {
+    const customer = el('td', {},
+      el('div', { textContent: o.customerName || '—' }),
+      el('div', { className: 'muted', textContent: [o.customerPhone, o.address, o.landmark].filter(Boolean).join(' · ') }));
+    if (o.callbackReason) customer.append(el('div', { className: 'muted', textContent: `دلیل: ${o.callbackReason}` }));
+    const items = el('ul', { className: 'items' });
+    for (const i of o.items) items.append(el('li', { textContent: `${fa(i.quantity)} × ${i.nameFa}${i.note ? ` (${i.note})` : ''}` }));
+    const actions = el('td');
+    const next = { new: ['accepted', 'cancelled'], callback: ['accepted', 'cancelled'], accepted: ['delivered', 'cancelled'] }[o.status] || [];
+    for (const s of next) {
+      actions.append(el('button', { className: s === 'cancelled' ? '' : 'primary', textContent: STATUS[s], onclick: () => setStatus(o.id, s) }));
+    }
+    body.append(el('tr', {},
+      el('td', { textContent: o.code }),
+      el('td', {}, el('span', { className: `badge s-${o.status}`, textContent: STATUS[o.status] || o.status })),
+      customer,
+      el('td', {}, items),
+      el('td', { textContent: `${fa(o.totalAfn)} افغانی` }),
+      el('td', { className: 'muted', textContent: when(o.createdAt) }),
+      actions));
+  }
+}
+
+function renderCalls(calls) {
+  const body = document.getElementById('calls');
+  body.replaceChildren();
+  if (calls.length === 0) {
+    body.append(el('tr', {}, el('td', { colSpan: 6, className: 'muted', textContent: 'هنوز تماسی ثبت نشده.' })));
+  }
+  for (const c of calls) {
+    const transcript = el('details', {}, el('summary', { textContent: `${fa(c.transcript.length)} پیام` }));
+    for (const line of c.transcript) {
+      transcript.append(el('div', { className: `line-${line.role}`,
+        textContent: `${line.role === 'user' ? 'مشتری' : 'دستیار'}: ${line.text}` }));
+    }
+    body.append(el('tr', {},
+      el('td', { className: 'muted', textContent: when(c.startedAt) }),
+      el('td', { textContent: CHANNEL[c.channel] || c.channel }),
+      el('td', { textContent: OUTCOME[c.outcome] || c.outcome }),
+      el('td', { textContent: `${fa(c.durationSec)} ثانیه` }),
+      el('td', { textContent: `$${Number(c.estCostUsd).toFixed(3)}` }),
+      el('td', {}, transcript)));
+  }
+}
+
+async function refresh() {
+  try {
+    const [stats, orders, calls] = await Promise.all([api('/stats'), api('/orders?limit=50'), api('/calls?limit=30')]);
+    document.getElementById('st-calls').textContent = fa(stats.calls);
+    document.getElementById('st-rate').textContent = `${fa(Math.round(stats.completionRate * 100))}٪`;
+    document.getElementById('st-callbacks').textContent = fa(stats.callbacks);
+    document.getElementById('st-duration').textContent = `${fa(Math.round(stats.avgDurationSec))} ثانیه`;
+    document.getElementById('st-cost').textContent = `$${stats.avgCostUsd.toFixed(3)}`;
+    renderOrders(orders);
+    renderCalls(calls);
+    document.getElementById('updated').textContent = `به‌روز: ${new Date().toLocaleTimeString('fa-AF')}`;
+  } catch (error) {
+    if (error.message !== 'unauthorized') document.getElementById('updated').textContent = 'خطا در دریافت اطلاعات';
+  }
+}
+
+function start() {
+  document.getElementById('login').hidden = true;
+  document.getElementById('app').hidden = false;
+  document.getElementById('logout').hidden = false;
+  refresh();
+}
+
+document.getElementById('login-btn').onclick = async () => {
+  token = document.getElementById('token').value.trim();
+  try {
+    await api('/stats');
+    try { localStorage.setItem('awazAdminToken', token); } catch {}
+    document.getElementById('login-error').textContent = '';
+    start();
+  } catch {
+    document.getElementById('login-error').textContent = 'رمز درست نیست.';
+  }
+};
+document.getElementById('logout').onclick = logout;
+setInterval(() => { if (token) refresh(); }, 10000);
+if (token) start(); else logout();
+</script>
+</body>
+</html>
